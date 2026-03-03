@@ -398,7 +398,7 @@ Use the Primary Colors from above — they're bright enough on dark backgrounds.
  * Registers all Excalidraw tools and resources on the given McpServer.
  * Shared between local (main.ts) and Vercel (api/mcp.ts) entry points.
  */
-export function registerTools(server: McpServer, distDir: string, store: CheckpointStore): void {
+export function registerTools(server: McpServer, distDir: string, store: CheckpointStore, options?: { baseUrl?: string }): void {
   const resourceUri = "ui://excalidraw/mcp-app.html";
 
   // ============================================================
@@ -494,8 +494,9 @@ Call read_me first to learn the element format.`,
 
       const checkpointId = crypto.randomUUID().replace(/-/g, "").slice(0, 18);
       await store.save(checkpointId, { elements: resolvedElements });
+      const browserLine = options?.baseUrl ? `\nView in browser: ${options.baseUrl}/view/${checkpointId}` : "";
       return {
-        content: [{ type: "text", text: `Diagram displayed! Checkpoint id: "${checkpointId}".
+        content: [{ type: "text", text: `Diagram displayed! Checkpoint id: "${checkpointId}".${browserLine}
 If user asks to create a new diagram - simply create a new one from scratch.
 However, if the user wants to edit something on this diagram "${checkpointId}", take these steps:
 1) read widget context (using read_widget_context tool) to check if user made any manual edits first
@@ -686,11 +687,11 @@ However, if the user wants to edit something on this diagram "${checkpointId}", 
  * Creates a new MCP server instance with Excalidraw drawing tools.
  * Used by local entry point (main.ts) and Docker deployments.
  */
-export function createServer(store: CheckpointStore): McpServer {
+export function createServer(store: CheckpointStore, options?: { baseUrl?: string }): McpServer {
   const server = new McpServer({
     name: "Excalidraw",
     version: "1.0.0",
   });
-  registerTools(server, DIST_DIR, store);
+  registerTools(server, DIST_DIR, store, options);
   return server;
 }

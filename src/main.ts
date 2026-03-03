@@ -10,8 +10,10 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import cors from "cors";
 import type { Request, Response } from "express";
+import type { CheckpointStore } from "./checkpoint-store.js";
 import { FileCheckpointStore } from "./checkpoint-store.js";
 import { createServer } from "./server.js";
+import { viewerHtml } from "./viewer.js";
 
 /**
  * Starts an MCP server with Streamable HTTP transport in stateless mode.
@@ -20,11 +22,42 @@ import { createServer } from "./server.js";
  */
 export async function startStreamableHTTPServer(
   createServer: () => McpServer,
+  store: CheckpointStore,
 ): Promise<void> {
   const port = parseInt(process.env.PORT ?? "3001", 10);
 
   const app = createMcpExpressApp({ host: "0.0.0.0" });
   app.use(cors());
+
+  // --- Browser viewer routes ---
+
+  app.get("/api/checkpoint/:id", async (req: Request, res: Response) => {
+    try {
+      const id = String(req.params.id);
+      const data = await store.load(id);
+      if (!data) {
+        res.status(404).json({ error: "Checkpoint not found" });
+        return;
+      }
+      res.json(data);
+    } catch {
+      res.status(400).json({ error: "Invalid checkpoint id" });
+    }
+  });
+
+  app.get("/view/:id", async (req: Request, res: Response) => {
+    try {
+      const id = String(req.params.id);
+      const data = await store.load(id);
+      if (!data) {
+        res.status(404).send("Checkpoint not found");
+        return;
+      }
+      res.type("html").send(viewerHtml(id));
+    } catch {
+      res.status(400).send("Invalid checkpoint id");
+    }
+  });
 
   app.all("/mcp", async (req: Request, res: Response) => {
     const server = createServer();
@@ -82,11 +115,14 @@ export async function startStdioServer(
 
 async function main() {
   const store = new FileCheckpointStore();
-  const factory = () => createServer(store);
   if (process.argv.includes("--stdio")) {
+    const factory = () => createServer(store);
     await startStdioServer(factory);
   } else {
-    await startStreamableHTTPServer(factory);
+    const port = parseInt(process.env.PORT ?? "3001", 10);
+    const baseUrl = `http://localhost:${port}`;
+    const factory = () => createServer(store, { baseUrl });
+    await startStreamableHTTPServer(factory, store);
   }
 }
 
