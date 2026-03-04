@@ -9,6 +9,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import cors from "cors";
+import express from "express";
 import type { Request, Response } from "express";
 import type { CheckpointStore } from "./checkpoint-store.js";
 import { FileCheckpointStore } from "./checkpoint-store.js";
@@ -28,6 +29,7 @@ export async function startStreamableHTTPServer(
 
   const app = createMcpExpressApp({ host: "0.0.0.0" });
   app.use(cors());
+  app.use(express.json({ limit: "5mb" }));
 
   // --- Browser viewer routes ---
 
@@ -42,6 +44,30 @@ export async function startStreamableHTTPServer(
       res.json(data);
     } catch {
       res.status(400).json({ error: "Invalid checkpoint id" });
+    }
+  });
+
+  app.post("/api/checkpoint/:id", async (req: Request, res: Response) => {
+    try {
+      const id = String(req.params.id);
+      if (!/^[a-zA-Z0-9]{1,36}$/.test(id)) {
+        res.status(400).json({ error: "Invalid checkpoint id format" });
+        return;
+      }
+      const { elements } = req.body;
+      if (!Array.isArray(elements)) {
+        res.status(400).json({ error: "elements must be an array" });
+        return;
+      }
+      const serialized = JSON.stringify({ elements });
+      if (serialized.length > 5 * 1024 * 1024) {
+        res.status(413).json({ error: "Payload too large" });
+        return;
+      }
+      await store.save(id, { elements });
+      res.json({ ok: true });
+    } catch {
+      res.status(400).json({ error: "Invalid request" });
     }
   });
 

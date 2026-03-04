@@ -492,7 +492,7 @@ Call read_me first to learn the element format.`,
         ? `\nTip: your cameraUpdate used ${badRatio.width}x${badRatio.height} — try to stick with 4:3 aspect ratio (e.g. 400x300, 800x600) in future.`
         : "";
 
-      const checkpointId = crypto.randomUUID().replace(/-/g, "").slice(0, 18);
+      const checkpointId = restoreEl?.id ?? crypto.randomUUID().replace(/-/g, "").slice(0, 18);
       await store.save(checkpointId, { elements: resolvedElements });
       const browserLine = options?.baseUrl ? `\nView in browser: ${options.baseUrl}/view/${checkpointId}` : "";
       return {
@@ -644,6 +644,35 @@ However, if the user wants to edit something on this diagram "${checkpointId}", 
         return { content: [{ type: "text", text: JSON.stringify(data) }] };
       } catch (err) {
         return { content: [{ type: "text", text: `read failed: ${(err as Error).message}` }], isError: true };
+      }
+    },
+  );
+
+  // ============================================================
+  // Tool 6: get_edits (model-visible — read edited checkpoint state)
+  // ============================================================
+  server.registerTool(
+    "get_edits",
+    {
+      description: "Read the current state of a previously created diagram checkpoint, including any user edits made in the browser viewer. Use this to see what changes a user has made to a diagram.",
+      inputSchema: { id: z.string().describe("Checkpoint ID") },
+      annotations: { readOnlyHint: true },
+    },
+    async ({ id }): Promise<CallToolResult> => {
+      try {
+        const data = await store.load(id as string);
+        if (!data) {
+          return {
+            content: [{ type: "text", text: `Checkpoint "${id}" not found — it may have expired or never existed.` }],
+            isError: true,
+          };
+        }
+        return { content: [{ type: "text", text: JSON.stringify(data) }] };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Failed to read checkpoint: ${(err as Error).message}` }],
+          isError: true,
+        };
       }
     },
   );
