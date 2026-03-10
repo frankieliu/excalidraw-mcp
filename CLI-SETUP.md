@@ -22,14 +22,14 @@ pnpm run build
 node dist/index.js
 ```
 
-Runs on `http://localhost:3001/mcp` by default. Override with `PORT=8080 node dist/index.js`.
+Runs on `http://localhost:3847/mcp` by default. Override with `PORT=8080 node dist/index.js`.
 
 ## Connect Claude Code
 
 In a separate terminal:
 
 ```bash
-claude mcp add excalidraw --transport http --url http://localhost:3001/mcp
+claude mcp add excalidraw --transport http --url http://localhost:3847/mcp
 ```
 
 Use `--transport http` — the browser viewer requires HTTP mode.
@@ -43,7 +43,7 @@ Use `--transport http` — the browser viewer requires HTTP mode.
 Claude calls `read_me` then `create_view`. The response includes a browser link:
 
 ```
-View in browser: http://localhost:3001/view/<checkpointId>
+View in browser: http://localhost:3847/view/<checkpointId>
 ```
 
 Open that URL to see and edit the diagram.

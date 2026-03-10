@@ -85,7 +85,7 @@ Excalidraw keeps deleted elements in its internal state (for undo). We strip the
 1. `npm run build`
 2. `npm run serve`
 3. Call `create_view` via Claude CLI to generate a diagram — note the checkpoint ID
-4. Open `http://localhost:3001/view/<checkpointId>` — confirm full editing (draw, move, delete)
+4. Open `http://localhost:3847/view/<checkpointId>` — confirm full editing (draw, move, delete)
 5. Make edits, wait 2s — confirm "Saved" indicator appears at bottom-right
 6. Call `get_edits` with the checkpoint ID — confirm it returns the edited elements
 7. Call `create_view` with `restoreCheckpoint` referencing that ID — confirm the returned checkpoint ID is the **same** as before (not a new UUID)

@@ -100,7 +100,7 @@ Build pipeline: `tsc --noEmit` → `vite build` (singlefile HTML) → `tsc -p ts
 ```bash
 # HTTP (Streamable) — default, stateless per-request
 npm run serve          # or: bun --watch main.ts
-# Starts on http://localhost:3001/mcp
+# Starts on http://localhost:3847/mcp
 
 # stdio — for Claude Desktop
 node dist/index.js --stdio

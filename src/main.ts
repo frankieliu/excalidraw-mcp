@@ -25,7 +25,7 @@ export async function startStreamableHTTPServer(
   createServer: () => McpServer,
   store: CheckpointStore,
 ): Promise<void> {
-  const port = parseInt(process.env.PORT ?? "3001", 10);
+  const port = parseInt(process.env.PORT ?? "3847", 10);
 
   const app = createMcpExpressApp({ host: "0.0.0.0" });
   app.use(cors());
@@ -145,7 +145,7 @@ async function main() {
     const factory = () => createServer(store);
     await startStdioServer(factory);
   } else {
-    const port = parseInt(process.env.PORT ?? "3001", 10);
+    const port = parseInt(process.env.PORT ?? "3847", 10);
     const baseUrl = `http://localhost:${port}`;
     const factory = () => createServer(store, { baseUrl });
     await startStreamableHTTPServer(factory, store);

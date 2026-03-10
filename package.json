@@ -26,9 +26,11 @@
     "serve": "bun --watch src/main.ts",
     "start": "cross-env NODE_ENV=development npm run build && npm run serve",
     "dev": "cross-env NODE_ENV=development concurrently 'npm run watch' 'npm run serve'",
+    "dev:tmux": "tmux kill-session -t excalidraw 2>/dev/null; ~/Projects/tmux-helper/tmux-send.sh excalidraw 'cd ~/Projects/excalidraw-mcp && PORT=3847 pnpm run dev'",
     "dev:ui": "vite --config vite.config.dev.ts",
+    "serve:cli": "cross-env PORT=3847 node dist/index.js",
     "server": "node dist/index.js",
-    "claude:add": "claude mcp add excalidraw --transport http http://localhost:3001/mcp",
+    "claude:add": "claude mcp add excalidraw --transport http http://localhost:3847/mcp",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {

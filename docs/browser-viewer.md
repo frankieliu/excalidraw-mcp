@@ -35,7 +35,7 @@ Returns self-contained HTML that:
 - `registerTools` and `createServer` accept an optional `options?: { baseUrl?: string }` parameter
 - When `baseUrl` is set, the `create_view` tool response text includes an extra line:
   ```
-  View in browser: http://localhost:3001/view/<checkpointId>
+  View in browser: http://localhost:3847/view/<checkpointId>
   ```
 - The Vercel entry point (`api/mcp.ts`) is unaffected since the parameter is optional
 
@@ -67,7 +67,7 @@ npm run build
 node dist/index.js
 ```
 
-By default it listens on port 3001. Override with the `PORT` environment variable:
+By default it listens on port 3847. Override with the `PORT` environment variable:
 
 ```bash
 PORT=8080 node dist/index.js
@@ -76,7 +76,7 @@ PORT=8080 node dist/index.js
 You should see:
 
 ```
-MCP server listening on http://localhost:3001/mcp
+MCP server listening on http://localhost:3847/mcp
 ```
 
 ### 3. Connect Claude Code to the server
@@ -84,7 +84,7 @@ MCP server listening on http://localhost:3001/mcp
 In a separate terminal:
 
 ```bash
-claude mcp add excalidraw --transport http --url http://localhost:3001/mcp
+claude mcp add excalidraw --transport http --url http://localhost:3847/mcp
 ```
 
 **Important:** Use `--transport http` (not `--stdio`). The browser viewer only works in HTTP mode because it requires the Express server to be running and serving the `/view/:id` and `/api/checkpoint/:id` routes.
@@ -100,7 +100,7 @@ Start a Claude Code session and ask Claude to draw something:
 Claude will call `read_me` then `create_view`. The tool response will include a line like:
 
 ```
-View in browser: http://localhost:3001/view/a1b2c3d4e5f6g7h8i9
+View in browser: http://localhost:3847/view/a1b2c3d4e5f6g7h8i9
 ```
 
 Open that URL in your browser to see the interactive diagram with pan and zoom.
@@ -108,7 +108,7 @@ Open that URL in your browser to see the interactive diagram with pan and zoom.
 ### 5. Verify the API endpoint
 
 ```bash
-curl http://localhost:3001/api/checkpoint/<checkpointId>
+curl http://localhost:3847/api/checkpoint/<checkpointId>
 ```
 
 Returns the raw JSON with the diagram elements. Returns `{"error":"Checkpoint not found"}` with HTTP 404 for invalid or expired checkpoint IDs.
