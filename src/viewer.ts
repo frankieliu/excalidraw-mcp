@@ -86,11 +86,29 @@ export function viewerHtml(checkpointId: string): string {
       }, 2000);
     }
 
+    const INVISIBLE_COLORS = new Set(["transparent", "#ffffff", "#fff", "white", ""]);
+
     function convertRawElements(els) {
       const real = els.filter(el => !PSEUDO_TYPES.has(el.type));
-      const withDefaults = real.map(el =>
-        el.label ? { ...el, label: { textAlign: "center", verticalAlign: "middle", ...el.label } } : el
-      );
+      const withDefaults = real.map(el => {
+        let mapped = el.label ? { ...el, label: { textAlign: "center", verticalAlign: "middle", ...el.label } } : { ...el };
+        // If label has no explicit strokeColor and parent has invisible stroke, default label to readable color
+        if (mapped.label && !mapped.label.strokeColor && INVISIBLE_COLORS.has((mapped.strokeColor || "").toLowerCase())) {
+          mapped.label = { ...mapped.label, strokeColor: "#1e1e1e" };
+        }
+        // Convert startBinding/endBinding to start/end for skeleton API
+        if (mapped.type === "arrow" || mapped.type === "line") {
+          if (mapped.startBinding?.elementId) {
+            mapped.start = { id: mapped.startBinding.elementId };
+            delete mapped.startBinding;
+          }
+          if (mapped.endBinding?.elementId) {
+            mapped.end = { id: mapped.endBinding.elementId };
+            delete mapped.endBinding;
+          }
+        }
+        return mapped;
+      });
       return convertToExcalidrawElements(withDefaults, { regenerateIds: false })
         .map(el => el.type === "text" ? { ...el, fontFamily: FONT_FAMILY?.Excalifont ?? 1 } : el);
     }

@@ -95,9 +95,29 @@ Canvas background is white.
 - points: [dx, dy] offsets from element x,y
 - endArrowhead: null | "arrow" | "bar" | "dot" | "triangle"
 
-### Arrow Bindings
-Arrow: \`"startBinding": { "elementId": "r1", "fixedPoint": [1, 0.5] }\`
+### Arrow Bindings (ALWAYS use when connecting arrows to shapes)
+Arrows MUST use \`startBinding\` and/or \`endBinding\` to anchor to shapes. Without bindings, arrows float near shapes but are NOT connected — they won't move with the shape and look broken.
+
+Arrow: \`"startBinding": { "elementId": "r1", "fixedPoint": [1, 0.5] }, "endBinding": { "elementId": "r2", "fixedPoint": [0, 0.5] }\`
 fixedPoint: top=[0.5,0], bottom=[0.5,1], left=[0,0.5], right=[1,0.5]
+
+### Grouping (ALWAYS group related elements together)
+Use \`groupIds\` to group elements that belong together. Grouped elements move, resize, and select as a unit.
+
+\`"groupIds": ["g1"]\` — every element with \`"g1"\` in its groupIds array is part of the same group.
+
+**Nesting**: use multiple group IDs for nested groups. Inner group first, outer group second:
+- Circle + icon text: \`"groupIds": ["icon1", "card1"]\`
+- Caption text: \`"groupIds": ["card1"]\`
+- Background rect: \`"groupIds": ["card1"]\`
+
+This makes the circle+icon selectable as a sub-group, while all elements move together as "card1".
+
+**When to group:**
+- Shape + its label text (if using standalone text, not \`label\` property)
+- Icon/illustration + its text
+- A "card" or zone: background rect + all contents inside it
+- Any set of elements that logically belong together
 
 **cameraUpdate** (pseudo-element — controls the viewport, not drawn):
 \`{ "type": "cameraUpdate", "width": 800, "height": 600, "x": 0, "y": 0 }\`
@@ -211,6 +231,7 @@ Uses 2 camera positions: start zoomed in (M) for title, then zoom out (L) to rev
 \`\`\`
 
 Common mistakes to avoid:
+- **Arrows without bindings look disconnected** — ALWAYS add \`startBinding\` and \`endBinding\` when an arrow connects two shapes. Without bindings, arrows just float nearby and don't visually attach to the shapes
 - **Camera size must match content with padding** — if your content is 500px tall, use 800x600 camera, not 500px. No padding = truncated edges
 - **Center titles relative to the diagram below** — estimate the diagram's total width and center the title text over it, not over the canvas
 - **Arrow labels need space** — long labels like "ATP + NADPH" overflow short arrows. Keep labels short or make arrows wider
