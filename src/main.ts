@@ -50,7 +50,7 @@ export async function startStreamableHTTPServer(
   app.post("/api/checkpoint/:id", async (req: Request, res: Response) => {
     try {
       const id = String(req.params.id);
-      if (!/^[a-zA-Z0-9]{1,36}$/.test(id)) {
+      if (!/^[a-zA-Z0-9_-]{1,64}$/.test(id)) {
         res.status(400).json({ error: "Invalid checkpoint id format" });
         return;
       }
